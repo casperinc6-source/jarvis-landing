@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JARVIS — the voice assistant that runs your computer</title>
+<meta name="description" content="Say what needs doing. JARVIS runs the apps, watches the screen, remembers locally, and clears the busywork." />
+<style>
+  :root {
+    --navy: #080B16;        /* Deep Space Navy — page bg */
+    --surface: #0B121E;     /* secondary surface */
+    --ice: #E8F4FF;         /* primary text on dark */
+    --cyan: #4FD8FF;        /* Electric Cyan — actions */
+    --ink: #04070D;         /* text on cyan */
+    --slate: #253549;       /* borders */
+    --mut: rgba(232, 244, 255, .62);
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    --pill: 28px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--navy); color: var(--ice);
+    font-family: var(--sans); font-size: 19px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--cyan); color: var(--ink); }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 96px 0; }
+  h1 { font-size: clamp(38px, 6vw, 56px); font-weight: 700; line-height: 1.08; letter-spacing: -.5px; margin: 0 0 20px; }
+  h2 { font-size: clamp(28px, 4vw, 38px); font-weight: 700; line-height: 1.15; margin: 0 0 14px; }
+  p  { margin: 0 0 16px; color: var(--mut); }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .22em;
+    text-transform: uppercase; color: var(--cyan); margin-bottom: 18px;
+  }
+  .mono { font-family: var(--mono); }
+  a { color: var(--cyan); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ---- buttons: pill radius 28px, primary cyan w/ soft glow ---- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 30px; border-radius: var(--pill);
+    font-size: 17px; font-weight: 600; border: 1px solid transparent;
+    cursor: pointer; transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .btn-primary { background: var(--cyan); color: var(--ink); box-shadow: 0 0 24px rgba(79, 216, 255, .35); }
+  .btn-primary:hover { text-decoration: none; box-shadow: 0 0 38px rgba(79, 216, 255, .55); transform: translateY(-1px); }
+  .btn-secondary { background: var(--surface); color: var(--ice); border-color: var(--slate); }
+  .btn-secondary:hover { text-decoration: none; border-color: var(--cyan); }
+  .btn-small { padding: 9px 20px; font-size: 14px; }
+  :is(a, button):focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: var(--pill); }
+
+  /* ---- nav ---- */
+  nav { display: flex; align-items: center; gap: 28px; padding: 22px 0; }
+  nav .brand { font-family: var(--mono); font-weight: 600; letter-spacing: .18em; font-size: 15px; color: var(--ice); }
+  nav .brand b { color: var(--cyan); font-weight: 600; }
+  nav .links { margin-left: auto; display: flex; gap: 24px; font-size: 15px; }
+  nav .links a { color: var(--mut); }
+  nav .links a:hover { color: var(--ice); text-decoration: none; }
+  @media (max-width: 720px) { nav .links a:not(.btn) { display: none; } }
+
+  /* ---- hero ---- */
+  .hero { padding: 84px 0 64px; text-align: center; }
+  .hero h1 .glow { color: var(--cyan); text-shadow: 0 0 32px rgba(79, 216, 255, .45); }
+  .hero p.lede { font-size: 21px; max-width: 640px; margin: 0 auto 36px; }
+  .hero .ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 18px; }
+  .hero .platforms { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; color: var(--mut); }
+
+  /* ---- HUD visual ---- */
+  .hud-wrap { margin: 64px auto 0; max-width: 900px; }
+  .hud {
+    background: linear-gradient(180deg, #0A0F1C, var(--surface));
+    border: 1px solid var(--slate); border-radius: 18px;
+    padding: 26px; display: grid; grid-template-columns: 220px 1fr 260px; gap: 22px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .55), 0 0 60px rgba(79, 216, 255, .07);
+    text-align: left;
+  }
+  @media (max-width: 860px) { .hud { grid-template-columns: 1fr; } }
+  .hud .panel { border: 1px solid var(--slate); border-radius: 12px; padding: 16px; background: rgba(8, 11, 22, .6); }
+  .hud .panel h4 {
+    margin: 0 0 12px; font-family: var(--mono); font-size: 10px; font-weight: 600;
+    letter-spacing: .2em; color: var(--mut); text-transform: uppercase;
+  }
+  /* core */
+  .core { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 8px 0; }
+  .ring { width: 128px; height: 128px; border-radius: 50%; position: relative; display: grid; place-items: center; }
+  .ring::before {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0 300deg, var(--cyan) 330deg, transparent 360deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+    animation: spin 3.2s linear infinite;
+  }
+  .ring::after {
+    content: ""; position: absolute; inset: 14px; border-radius: 50%;
+    border: 1px dashed rgba(79, 216, 255, .35); animation: spin 9s linear infinite reverse;
+  }
+  .ring .dot {
+    width: 14px; height: 14px; border-radius: 50%; background: var(--cyan);
+    box-shadow: 0 0 18px var(--cyan), 0 0 44px rgba(79, 216, 255, .5);
+    animation: pulse 2.1s ease-in-out infinite;
+  }
+  .ring .glyph { position: absolute; font-family: var(--mono); font-size: 15px; color: var(--cyan); letter-spacing: .1em; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: .75; } }
+  .status { font-family: var(--mono); font-size: 11px; letter-spacing: .18em; color: var(--cyan); }
+  .status small { display: block; color: var(--mut); letter-spacing: .1em; margin-top: 4px; font-size: 10px; }
+  /* telemetry */
+  .tele .bar { margin: 11px 0; }
+  .tele .bar .lbl { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--mut); margin-bottom: 5px; }
+  .tele .bar .track { height: 5px; border-radius: 3px; background: rgba(37, 53, 73, .6); overflow: hidden; }
+  .tele .bar .fill { height: 100%; border-radius: 3px; background: var(--cyan); box-shadow: 0 0 10px rgba(79, 216, 255, .7); transition: width .9s ease; }
+  /* log */
+  .log { font-family: var(--mono); font-size: 11.5px; line-height: 1.9; color: var(--mut); min-height: 168px; }
+  .log div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .log .t { color: rgba(79, 216, 255, .75); }
+  .log .ok { color: var(--ice); }
+  .log .warn { color: #FFD166; }
+  @media (prefers-reduced-motion: reduce) { .ring::before, .ring::after, .ring .dot { animation: none; } }
+
+  /* ---- capabilities ---- */
+  .cap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 44px; }
+  @media (max-width: 920px) { .cap-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .cap-grid { grid-template-columns: 1fr; } }
+  .cap {
+    background: var(--surface); border: 1px solid var(--slate); border-radius: 14px; padding: 26px;
+    transition: border-color .2s ease;
+  }
+  .cap:hover { border-color: rgba(79, 216, 255, .55); }
+  .cap .quote {
+    font-family: var(--mono); font-size: 12.5px; color: var(--cyan);
+    background: rgba(79, 216, 255, .07); border: 1px solid rgba(79, 216, 255, .25);
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; line-height: 1.55;
+  }
+  .cap h3 { margin: 0 0 8px; font-size: 18px; font-weight: 600; color: var(--ice); }
+  .cap p { font-size: 15px; line-height: 1.55; margin: 0; }
+
+  /* ---- setup ---- */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 44px; counter-reset: step; }
+  @media (max-width: 780px) { .steps { grid-template-columns: 1fr; } }
+  .step { background: var(--surface); border: 1px solid var(--slate); border-radius: 14px; padding: 26px; }
+  .step .n { font-family: var(--mono); font-size: 12px; color: var(--cyan); letter-spacing: .18em; margin-bottom: 12px; }
+  .step h3 { margin: 0 0 8px; font-size: 18px; }
+  .step p { font-size: 15px; margin: 0; }
+  .step code { font-family: var(--mono); font-size: 12.5px; color: var(--cyan); background: rgba(79,216,255,.07); padding: 2px 7px; border-radius: 5px; }
+
+  /* ---- pricing ---- */
+  .tiers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; max-width: 780px; margin: 44px auto 0; }
+  @media (max-width: 680px) { .tiers { grid-template-columns: 1fr; } }
+  .tier { background: var(--surface); border: 1px solid var(--slate); border-radius: 16px; padding: 32px; }
+  .tier.featured { border-color: rgba(79, 216, 255, .6); box-shadow: 0 0 44px rgba(79, 216, 255, .10); }
+  .tier .name { font-family: var(--mono); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--mut); }
+  .tier.featured .name { color: var(--cyan); }
+  .tier .price { font-size: 44px; font-weight: 700; margin: 10px 0 2px; color: var(--ice); }
+  .tier .price small { font-size: 15px; font-weight: 400; color: var(--mut); }
+  .tier ul { list-style: none; margin: 22px 0 26px; padding: 0; font-size: 15px; color: var(--mut); }
+  .tier li { padding: 7px 0 7px 26px; position: relative; }
+  .tier li::before { content: "▸"; position: absolute; left: 4px; color: var(--cyan); }
+  .tier .btn { width: 100%; justify-content: center; }
+
+  /* ---- faq ---- */
+  .faq { max-width: 780px; margin: 44px auto 0; }
+  .faq details { background: var(--surface); border: 1px solid var(--slate); border-radius: 12px; padding: 0; margin-bottom: 12px; }
+  .faq summary { cursor: pointer; list-style: none; padding: 18px 22px; font-weight: 600; font-size: 16.5px; color: var(--ice); display: flex; justify-content: space-between; align-items: center; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; font-family: var(--mono); color: var(--cyan); font-size: 18px; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq details p { padding: 0 22px 20px; margin: 0; font-size: 15.5px; }
+
+  /* ---- final cta + footer ---- */
+  .final { text-align: center; border-top: 1px solid var(--slate); }
+  footer { border-top: 1px solid var(--slate); padding: 28px 0 40px; }
+  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; color: var(--mut); }
+  footer a { color: var(--mut); }
+  footer a:hover { color: var(--cyan); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <span class="brand">J.A.R.V.I.S<b>_</b></span>
+    <div class="links">
+      <a href="#capabilities">Capabilities</a>
+      <a href="#setup">Setup</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn btn-primary btn-small" href="#pricing">Get JARVIS</a>
+    </div>
+  </nav>
+</div>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Voice Operating Layer · Local-First</div>
+    <h1>It doesn't tell you how to run<br />your computer. <span class="glow">It runs it.</span></h1>
+    <p class="lede">Say what needs doing — out loud, in plain words. JARVIS opens the apps, moves the windows, reads the screen, and clears the busywork while you keep talking.</p>
+    <div class="ctas">
+      <a class="btn btn-primary" href="#pricing">Get JARVIS</a>
+      <a class="btn btn-secondary" href="#capabilities">See what it can do</a>
+    </div>
+    <div class="platforms">MACOS · WINDOWS · LINUX — RUNS LOCALLY, YOUR DATA STAYS YOURS</div>
+
+    <!-- HUD product visual -->
+    <div class="hud-wrap">
+      <div class="hud" role="img" aria-label="JARVIS heads-up display with telemetry and activity log">
+        <div class="panel core">
+          <div class="ring"><span class="dot"></span><span class="glyph">JS</span></div>
+          <div class="status">LISTENING<small>mic · on-device wake word</small></div>
+        </div>
+        <div class="panel tele">
+          <h4>Telemetry</h4>
+          <div class="bar"><div class="lbl"><span>CPU</span><span id="t-cpu">—</span></div><div class="track"><div class="fill" id="f-cpu"></div></div></div>
+          <div class="bar"><div class="lbl"><span>MEMORY</span><span id="t-mem">—</span></div><div class="track"><div class="fill" id="f-mem"></div></div></div>
+          <div class="bar"><div class="lbl"><span>NETWORK</span><span id="t-net">—</span></div><div class="track"><div class="fill" id="f-net"></div></div></div>
+          <div class="bar"><div class="lbl"><span>AGENT LOAD</span><span id="t-agt">—</span></div><div class="track"><div class="fill" id="f-agt"></div></div></div>
+          <h4 style="margin-top:16px">Windows</h4>
+          <div class="log" style="min-height:0" id="wins">
+            <div><span class="t">01</span> <span class="ok">Terminal — deploy.sh</span></div>
+            <div><span class="t">02</span> <span class="ok">Figma — hud-v1</span></div>
+            <div><span class="t">03</span> <span class="ok">Mail — 3 unread</span></div>
+            <div><span class="t">04</span> <span class="ok">Spotify — focus mix</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h4>Activity Log</h4>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ CAPABILITIES ============ -->
+<section id="capabilities">
+  <div class="wrap">
+    <div class="eyebrow">Capabilities</div>
+    <h2>One voice, every part of the machine.</h2>
+    <p>Six systems, one conversation. No scripting, no window-hunting, no tab archaeology.</p>
+    <div class="cap-grid">
+      <div class="cap">
+        <div class="quote">"Open the quarterly deck and put it next to my inbox."</div>
+        <h3>Runs apps &amp; windows</h3>
+        <p>Launches anything installed, arranges windows into workspaces, switches desktops, and closes the noise when you're done.</p>
+      </div>
+      <div class="cap">
+        <div class="quote">"What am I looking at right now?"</div>
+        <h3>Sees screen &amp; camera</h3>
+        <p>Reads the screen on request — summarizes the doc you're on, finds that error, checks who's at the door through the camera.</p>
+      </div>
+      <div class="cap">
+        <div class="quote">"Remember that the prod key lives in the vault."</div>
+        <h3>Remembers locally</h3>
+        <p>A private memory store on your disk — preferences, projects, people. Nothing syncs anywhere you didn't point it at.</p>
+      </div>
+      <div class="cap">
+        <div class="quote">"Reschedule the 3pm and reply to Sam with the numbers."</div>
+        <h3>Handles the busywork</h3>
+        <p>Calendar shuffles, drafted replies, renamed files, filled forms. The chores you'd rather never touch, done while you think.</p>
+      </div>
+      <div class="cap">
+        <div class="quote">"What changed in the spec this week? Sources."</div>
+        <h3>Live search, with sources</h3>
+        <p>Searches the live web and your own folders, then answers with the receipts — every claim linked back to where it came from.</p>
+      </div>
+      <div class="cap">
+        <div class="quote">"Disk is at 91% — fix it before I notice."</div>
+        <h3>Keeps the machine healthy</h3>
+        <p>Watches CPU, memory and disk; kills runaway processes with a confirmation; clears caches; flags the weird before it becomes the broken.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SETUP ============ -->
+<section id="setup" style="border-top: 1px solid var(--slate);">
+  <div class="wrap">
+    <div class="eyebrow">Setup</div>
+    <h2>Talking in ninety seconds.</h2>
+    <div class="steps">
+      <div class="step"><div class="n">STEP 01</div><h3>Install</h3><p>One small app for macOS, Windows, or Linux. No account required to start — drag, run, <code>jarvis</code>.</p></div>
+      <div class="step"><div class="n">STEP 02</div><h3>Grant the keys</h3><p>Approve exactly what JARVIS may touch — apps, screen, files. Permissions are visible and revocable at any moment.</p></div>
+      <div class="step"><div class="n">STEP 03</div><h3>Say something</h3><p>"Open my morning layout." That's the whole onboarding. It learns your routines from the way you actually work.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section id="pricing" style="border-top: 1px solid var(--slate);">
+  <div class="wrap">
+    <div class="eyebrow">Pricing</div>
+    <h2>Free where it counts. Pro where it compounds.</h2>
+    <div class="tiers">
+      <div class="tier">
+        <div class="name">Personal</div>
+        <div class="price">$0 <small>/ month</small></div>
+        <ul>
+          <li>Voice control for apps, windows &amp; files</li>
+          <li>Local memory on one machine</li>
+          <li>Screen understanding — 20 sessions / day</li>
+          <li>Busywork automations — 30 / month</li>
+          <li>Community support</li>
+        </ul>
+        <a class="btn btn-secondary" href="#">Download Personal</a>
+      </div>
+      <div class="tier featured">
+        <div class="name">Pro — for operators</div>
+        <div class="price">$12 <small>/ month</small></div>
+        <ul>
+          <li>Everything in Personal, unlimited</li>
+          <li>Camera vision + continuous screen context</li>
+          <li>Live web search with full source receipts</li>
+          <li>Machine health autopilot &amp; alerts</li>
+          <li>Multi-machine sync, encrypted end-to-end</li>
+          <li>Priority support from the engineers</li>
+        </ul>
+        <a class="btn btn-primary" href="#">Get Pro</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq" style="border-top: 1px solid var(--slate);">
+  <div class="wrap">
+    <div class="eyebrow">FAQ</div>
+    <h2>Asked before launch. Answered anyway.</h2>
+    <div class="faq">
+      <details open>
+        <summary>Does JARVIS send my screen or files to a server?</summary>
+        <p>No. Wake word, commands and screen reads are processed on your machine. The only network calls are the live-search queries you explicitly ask for — and Pro's encrypted sync between machines you own.</p>
+      </details>
+      <details>
+        <summary>What stops it from doing something destructive?</summary>
+        <p>Every irreversible action — deleting, sending, purchasing, killing processes — requires a spoken or clicked confirmation. You can also pin a per-app allowlist so some software is simply out of reach.</p>
+      </details>
+      <details>
+        <summary>Which platforms are supported?</summary>
+        <p>macOS 13+, Windows 11, and the major Linux desktops (GNOME, KDE). The core voice loop ships everywhere; deep window management follows each OS's native APIs.</p>
+      </details>
+      <details>
+        <summary>Can it work fully offline?</summary>
+        <p>Yes — everything except live web search runs with the network cable pulled. That's the point of local-first: your assistant works in airplane mode.</p>
+      </details>
+      <details>
+        <summary>How is Pro billed?</summary>
+        <p>$12 per month, card or bank transfer, cancel anytime from the app. Personal stays free forever — it is not a trial.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="final">
+  <div class="wrap">
+    <h2>Your computer, <span style="color:var(--cyan)">on your word.</span></h2>
+    <p style="max-width:520px;margin:0 auto 30px">Install it tonight, talk to it tomorrow morning. The busywork is about to have a very bad week.</p>
+    <a class="btn btn-primary" href="#pricing">Get JARVIS</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>J.A.R.V.I.S — VOICE OPERATING LAYER</span>
+    <span>BUILD <a href="#">0.9.4</a> · LOCAL-FIRST · <a href="#">PRIVACY</a> · <a href="#">DOCS</a></span>
+  </div>
+</footer>
+
+<script>
+  // ---- animated telemetry -------------------------------------------------
+  const set = (id, pct) => {
+    document.getElementById('f-' + id).style.width = pct + '%';
+    document.getElementById('t-' + id).textContent = pct + '%';
+  };
+  function tickTele() {
+    set('cpu', 14 + Math.round(Math.random() * 30));
+    set('mem', 41 + Math.round(Math.random() * 14));
+    set('net', 5 + Math.round(Math.random() * 45));
+    set('agt', 30 + Math.round(Math.random() * 25));
+  }
+  tickTele(); setInterval(tickTele, 2200);
+
+  // ---- rotating activity log ---------------------------------------------
+  const LINES = [
+    ['» "open slack and the roadmap"', 'ok — 2 windows tiled'],
+    ['» "what\'s on my screen?"', 'described 4 windows · 0 bytes left the device'],
+    ['» disk watch', '91% full → cleaned 3.2 GB of caches'],
+    ['» "reply to Sam with Q3 numbers"', 'draft ready — awaiting "send it"'],
+    ['» live search: "spec changes this week"', '9 sources cited'],
+    ['» "reschedule the 3pm"', 'moved to Thu 10:00 · invites updated'],
+    ['» process watch', 'node — runaway at 340% CPU — confirm to kill'],
+    ['» "remember: standup moved to 9:15"', 'stored locally · memory/standup'],
+    ['» camera', 'porch: 1 parcel detected · 0 faces stored'],
+    ['» "focus mode"', 'Slack paused · notifications held 90 min'],
+  ];
+  const logEl = document.getElementById('log');
+  let li = 0;
+  function stamp() {
+    const d = new Date();
+    return d.toTimeString().slice(0, 8);
+  }
+  function pushLog() {
+    const [cmd, res] = LINES[li % LINES.length]; li++;
+    const row = document.createElement('div');
+    row.innerHTML = '<span class="t">' + stamp() + '</span> ' +
+      cmd.replace(/</g, '&lt;') + '<br><span class="ok">  ↳ ' + res.replace(/</g, '&lt;') + '</span>';
+    logEl.prepend(row);
+    while (logEl.children.length > 7) logEl.removeChild(logEl.lastChild);
+  }
+  pushLog(); pushLog(); pushLog();
+  setInterval(pushLog, 2600);
+</script>
+</body>
+</html>
