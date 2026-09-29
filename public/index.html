@@ -54,14 +54,67 @@
   .btn-small { padding: 9px 20px; font-size: 14px; }
   :is(a, button):focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: var(--pill); }
 
-  /* ---- nav ---- */
-  nav { display: flex; align-items: center; gap: 28px; padding: 22px 0; }
-  nav .brand { font-family: var(--mono); font-weight: 600; letter-spacing: .18em; font-size: 15px; color: var(--ice); }
-  nav .brand b { color: var(--cyan); font-weight: 600; }
-  nav .links { margin-left: auto; display: flex; gap: 24px; font-size: 15px; align-items: center; }
-  nav .links a { color: var(--mut); }
-  nav .links a:hover { color: var(--ice); text-decoration: none; }
-  @media (max-width: 720px) { nav .links a:not(.btn) { display: none; } }
+  /* ---- macOS-style menubar ---- */
+  .menubar {
+    position: sticky; top: 0; z-index: 60;
+    background: rgba(8, 11, 22, .78);
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    border-bottom: 1px solid var(--slate);
+  }
+  .menubar nav { display: flex; align-items: center; gap: 4px; padding: 10px 0; }
+  .menubar .brand { font-family: var(--mono); font-weight: 600; letter-spacing: .18em; font-size: 14px; color: var(--ice); padding: 5px 12px 5px 0; margin-right: 10px; }
+  .menubar .brand b { color: var(--cyan); font-weight: 600; }
+  .menubar .links { display: flex; gap: 2px; font-size: 14px; align-items: center; }
+  .menubar .links a { color: var(--mut); padding: 5px 11px; border-radius: 7px; transition: background .15s, color .15s; }
+  .menubar .links a:hover { color: var(--ice); background: rgba(232, 244, 255, .08); text-decoration: none; }
+  .menubar .status { margin-left: auto; display: flex; align-items: center; gap: 14px; font-family: var(--mono); font-size: 12px; color: var(--mut); }
+  .menubar .status .live { color: var(--cyan); letter-spacing: .14em; font-size: 10.5px; }
+  .menubar .status .live::before { content: "●"; margin-right: 6px; animation: pulse 2.1s ease-in-out infinite; }
+  @media (max-width: 860px) { .menubar .links { display: none; } .menubar .status .live { display: none; } }
+  section, header.hero { scroll-margin-top: 64px; }
+
+  /* ---- download modal ---- */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 100; display: none; place-items: center;
+    background: rgba(4, 7, 13, .72); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+  }
+  .modal-backdrop.open { display: grid; }
+  .modal {
+    width: min(540px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow: auto;
+    background: var(--surface); border: 1px solid var(--slate); border-radius: 14px;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, .65), 0 0 90px rgba(79, 216, 255, .08);
+  }
+  .modal .titlebar {
+    display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--slate);
+    background: rgba(8, 11, 22, .6); position: sticky; top: 0;
+  }
+  .modal .dots { display: flex; gap: 7px; }
+  .modal .dots i { width: 11px; height: 11px; border-radius: 50%; opacity: .8; }
+  .modal .dots i:nth-child(1) { background: #ff6b6b; }
+  .modal .dots i:nth-child(2) { background: #ffd166; }
+  .modal .dots i:nth-child(3) { background: #51cf66; }
+  .modal .titlebar .t { flex: 1; text-align: center; font-family: var(--mono); font-size: 12px; letter-spacing: .16em; color: var(--mut); text-transform: uppercase; }
+  .modal .titlebar .x { font-family: var(--mono); color: var(--mut); cursor: pointer; padding: 2px 8px; border-radius: 6px; }
+  .modal .titlebar .x:hover { color: var(--ice); background: rgba(232, 244, 255, .08); }
+  .modal .body { padding: 24px; }
+  .modal h3 { margin: 0 0 4px; font-size: 22px; }
+  .modal .sub { font-family: var(--mono); font-size: 12px; color: var(--mut); margin-bottom: 6px; }
+  .modal .plan-tag { display: none; font-family: var(--mono); font-size: 11px; color: var(--cyan); border: 1px solid rgba(79, 216, 255, .35); background: rgba(79, 216, 255, .07); border-radius: var(--pill); padding: 3px 12px; margin: 10px 0 2px; }
+  .modal .dl-rows { display: grid; gap: 10px; margin: 18px 0 14px; }
+  .dl-row { display: flex; align-items: center; gap: 14px; padding: 13px 14px; border: 1px solid var(--slate); border-radius: 12px; background: rgba(8, 11, 22, .5); }
+  .dl-row.rec { border-color: rgba(79, 216, 255, .55); box-shadow: 0 0 24px rgba(79, 216, 255, .10); }
+  .dl-row .pf { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--cyan); border: 1px solid rgba(79, 216, 255, .35); border-radius: 8px; padding: 8px 9px; min-width: 44px; text-align: center; }
+  .dl-row .meta { flex: 1; }
+  .dl-row .meta b { display: block; font-size: 15px; color: var(--ice); font-weight: 600; }
+  .dl-row .meta span { font-family: var(--mono); font-size: 11px; color: var(--mut); }
+  .dl-row .rec-tag { font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; color: var(--ink); background: var(--cyan); border-radius: var(--pill); padding: 3px 9px; font-weight: 700; }
+  .modal .dl-progress { height: 5px; border-radius: 3px; background: rgba(37, 53, 73, .6); overflow: hidden; margin-top: 6px; opacity: 0; transition: opacity .2s; }
+  .modal .dl-progress.show { opacity: 1; }
+  .modal .dl-progress .fill { height: 100%; width: 0%; background: var(--cyan); box-shadow: 0 0 10px rgba(79, 216, 255, .7); transition: width .2s ease; }
+  .modal .note { font-family: var(--mono); font-size: 11.5px; line-height: 1.6; color: var(--mut); min-height: 1.2em; margin-top: 12px; }
+  .modal .note.ok { color: var(--cyan); }
+  .modal .fine { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; color: var(--mut); border-top: 1px solid var(--slate); padding-top: 14px; margin-top: 16px; }
 
   /* ---- hero ---- */
   .hero { padding: 84px 0 64px; text-align: center; }
@@ -244,18 +297,24 @@
 </head>
 <body>
 
-<div class="wrap">
-  <nav>
-    <span class="brand">J.A.R.V.I.S<b>_</b></span>
-    <div class="links">
-      <a href="#capabilities">Capabilities</a>
-      <a href="#compare">Compare</a>
-      <a href="#setup">Setup</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#faq">FAQ</a>
-      <a class="btn btn-primary btn-small" href="#pricing">Get JARVIS</a>
-    </div>
-  </nav>
+<div class="menubar">
+  <div class="wrap">
+    <nav>
+      <span class="brand">J.A.R.V.I.S<b>_</b></span>
+      <div class="links">
+        <a href="#capabilities">Capabilities</a>
+        <a href="#compare">Compare</a>
+        <a href="#setup">Setup</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="status">
+        <span class="live">ONLINE</span>
+        <span id="clock">--:--</span>
+        <button class="btn btn-primary btn-small js-get">Get JARVIS</button>
+      </div>
+    </nav>
+  </div>
 </div>
 
 <!-- ============ HERO ============ -->
@@ -265,7 +324,7 @@
     <h1>It doesn't tell you how to run<br />your computer. <span class="glow">It runs it.</span></h1>
     <p class="lede">Say what needs doing — out loud, in plain words. JARVIS opens the apps, moves the windows, reads the screen, and clears the busywork while you keep talking.</p>
     <div class="ctas">
-      <a class="btn btn-primary" href="#pricing">Get JARVIS</a>
+      <button class="btn btn-primary js-get">Get JARVIS</button>
       <a class="btn btn-secondary" href="#capabilities">See what it can do</a>
     </div>
 
@@ -471,7 +530,7 @@
           <li>Busywork automations — 30 / month</li>
           <li>Community support</li>
         </ul>
-        <a class="btn btn-secondary" href="#">Download Personal</a>
+        <button class="btn btn-secondary js-get" data-plan="Personal · free forever">Download Personal</button>
       </div>
       <div class="tier featured">
         <div class="badge">Most popular</div>
@@ -486,7 +545,7 @@
           <li>Multi-machine sync, encrypted end-to-end</li>
           <li>Priority support from the engineers</li>
         </ul>
-        <a class="btn btn-primary" href="#">Get Pro</a>
+        <button class="btn btn-primary js-get" data-plan="Pro · $12/mo">Get Pro</button>
       </div>
     </div>
     <div class="pricing-foot">No contracts. No hidden fees. Cancel anytime. <br /><a href="#">See full pricing →</a></div>
@@ -530,7 +589,7 @@
     <h2>Stop clicking. <span style="color:var(--cyan)">Start saying.</span></h2>
     <p style="max-width:520px;margin:0 auto 30px">Your computer already knows how to do all of this. JARVIS just takes the orders.</p>
     <div class="ctas" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:0">
-      <a class="btn btn-primary" href="#pricing">Get JARVIS</a>
+      <button class="btn btn-primary js-get">Get JARVIS</button>
       <a class="btn btn-secondary" href="#">Read the Docs</a>
     </div>
     <div class="fine">FREE PLAN FOREVER · NO CREDIT CARD · 90-SECOND SETUP</div>
@@ -543,6 +602,42 @@
     <span>BUILD <a href="#">0.9.4</a> · LOCAL-FIRST · <a href="#">PRIVACY</a> · <a href="#">DOCS</a></span>
   </div>
 </footer>
+
+<!-- ============ DOWNLOAD MODAL ============ -->
+<div class="modal-backdrop" id="dl-modal" role="dialog" aria-modal="true" aria-labelledby="dl-title">
+  <div class="modal">
+    <div class="titlebar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="t" id="dl-title">Get JARVIS</div>
+      <div class="x" id="dl-close" role="button" aria-label="Close">✕</div>
+    </div>
+    <div class="body">
+      <h3>Download JARVIS</h3>
+      <div class="sub">BUILD 0.9.4 · VOICE OPERATING LAYER</div>
+      <div class="plan-tag" id="dl-plan"></div>
+      <div class="dl-rows">
+        <div class="dl-row" data-os="mac">
+          <span class="pf">MAC</span>
+          <span class="meta"><b>macOS 13+</b><span>jarvis-0.9.4.dmg · 38 MB · Apple Silicon &amp; Intel</span></span>
+          <button class="btn btn-secondary btn-small dl-btn">Download</button>
+        </div>
+        <div class="dl-row" data-os="win">
+          <span class="pf">WIN</span>
+          <span class="meta"><b>Windows 11</b><span>jarvis-setup-0.9.4.exe · 42 MB · x64</span></span>
+          <button class="btn btn-secondary btn-small dl-btn">Download</button>
+        </div>
+        <div class="dl-row" data-os="linux">
+          <span class="pf">LNX</span>
+          <span class="meta"><b>Linux · GNOME / KDE</b><span>jarvis-0.9.4.AppImage · 45 MB · x64</span></span>
+          <button class="btn btn-secondary btn-small dl-btn">Download</button>
+        </div>
+      </div>
+      <div class="dl-progress" id="dl-progress"><div class="fill"></div></div>
+      <div class="note" id="dl-note"></div>
+      <div class="fine">FREE PLAN FOREVER · NO ACCOUNT REQUIRED · PERMISSIONS REVOCABLE · UNINSTALL ANYTIME</div>
+    </div>
+  </div>
+</div>
 
 <script>
   // ---- animated telemetry -------------------------------------------------
@@ -608,6 +703,87 @@
   }
   sw.addEventListener('click', toggleBilling);
   sw.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleBilling(); } });
+
+  // ---- macOS menubar clock ---------------------------------------------------
+  const clockEl = document.getElementById('clock');
+  function tickClock() {
+    const d = new Date();
+    clockEl.textContent = d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
+      + ' ' + d.toTimeString().slice(0, 5);
+  }
+  tickClock(); setInterval(tickClock, 10000);
+
+  // ---- Get JARVIS download modal ----------------------------------------------
+  function detectOS() {
+    const ua = navigator.userAgent;
+    if (/Macintosh|Mac OS X/.test(ua)) return 'mac';
+    if (/Windows/.test(ua)) return 'win';
+    if (/Linux/.test(ua)) return 'linux';
+    return 'mac';
+  }
+  const modal = document.getElementById('dl-modal');
+  const note = document.getElementById('dl-note');
+  const planTag = document.getElementById('dl-plan');
+  const progress = document.getElementById('dl-progress');
+  const progressFill = progress.querySelector('.fill');
+  let lastFocus = null;
+
+  function openModal(plan) {
+    lastFocus = document.activeElement;
+    note.textContent = ''; note.classList.remove('ok');
+    progress.classList.remove('show'); progressFill.style.width = '0%';
+    if (plan) { planTag.textContent = 'PLAN: ' + plan.toUpperCase(); planTag.style.display = 'inline-block'; }
+    else planTag.style.display = 'none';
+    const os = detectOS();
+    document.querySelectorAll('.dl-row').forEach((row) => {
+      const rec = row.dataset.os === os;
+      row.classList.toggle('rec', rec);
+      const btn = row.querySelector('.dl-btn');
+      btn.classList.toggle('btn-primary', rec);
+      btn.classList.toggle('btn-secondary', !rec);
+      let tag = row.querySelector('.rec-tag');
+      if (rec && !tag) {
+        tag = document.createElement('span');
+        tag.className = 'rec-tag'; tag.textContent = 'YOUR OS';
+        row.querySelector('.meta').after(tag);
+      }
+      if (!rec && tag) tag.remove();
+    });
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    const first = modal.querySelector('.dl-btn.btn-primary') || modal.querySelector('.dl-btn');
+    if (first) first.focus();
+  }
+  function closeModal() {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    if (lastFocus) lastFocus.focus();
+  }
+  document.querySelectorAll('.js-get').forEach((b) =>
+    b.addEventListener('click', (e) => { e.preventDefault(); openModal(b.dataset.plan || ''); }));
+  document.getElementById('dl-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+  document.querySelectorAll('.dl-btn').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const row = btn.closest('.dl-row');
+      const file = row.querySelector('.meta span').textContent.split('·')[0].trim();
+      note.classList.remove('ok');
+      note.textContent = 'preparing ' + file + ' …';
+      progress.classList.add('show');
+      let p = 0;
+      const iv = setInterval(() => {
+        p = Math.min(100, p + 8 + Math.random() * 14);
+        progressFill.style.width = p + '%';
+        if (p >= 100) {
+          clearInterval(iv);
+          note.classList.add('ok');
+          note.textContent = 'demo page — the installer isn\u2019t bundled yet. everything else here is real.';
+          setTimeout(() => progress.classList.remove('show'), 600);
+        }
+      }, 120);
+    }));
 </script>
 </body>
 </html>
