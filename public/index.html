@@ -285,6 +285,40 @@
   .faq details[open] summary::after { content: "−"; }
   .faq details p { padding: 0 22px 20px; margin: 0; font-size: 15.5px; }
 
+  /* ---- live demo (interactive HUD console) ---- */
+  .demo-wrap { max-width: 860px; margin: 44px auto 0; border: 1px solid var(--slate); border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, #0A0F1C, var(--surface)); box-shadow: 0 30px 80px rgba(0, 0, 0, .55), 0 0 60px rgba(79, 216, 255, .07); }
+  .demo-titlebar { display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-bottom: 1px solid var(--slate); background: rgba(8, 11, 22, .65); }
+  .demo-titlebar .dots { display: flex; gap: 7px; }
+  .demo-titlebar .dots i { width: 11px; height: 11px; border-radius: 50%; opacity: .85; }
+  .demo-titlebar .dots i:nth-child(1) { background: #ff6b6b; }
+  .demo-titlebar .dots i:nth-child(2) { background: #ffd166; }
+  .demo-titlebar .dots i:nth-child(3) { background: #51cf66; }
+  .demo-titlebar .t { flex: 1; text-align: center; font-family: var(--mono); font-size: 11.5px; letter-spacing: .18em; color: var(--mut); text-transform: uppercase; }
+  .demo-status { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .16em; color: var(--cyan); }
+  .demo-status::before { content: "●"; animation: pulse 2.1s ease-in-out infinite; }
+  .demo-log { height: 320px; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; font-family: var(--mono); font-size: 13px; line-height: 1.65; }
+  .msg { max-width: 86%; }
+  .msg .who { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--mut); margin-bottom: 5px; }
+  .msg.user { align-self: flex-end; text-align: right; }
+  .msg.user .bubble { display: inline-block; background: rgba(79, 216, 255, .12); border: 1px solid rgba(79, 216, 255, .4); border-radius: 12px 12px 3px 12px; padding: 10px 14px; color: var(--ice); }
+  .msg.user .who { color: rgba(79, 216, 255, .8); }
+  .msg.jarvis .bubble { display: inline-block; background: rgba(8, 11, 22, .7); border: 1px solid var(--slate); border-radius: 12px 12px 12px 3px; padding: 10px 14px; color: var(--ice); text-align: left; }
+  .msg.jarvis .bubble .cyan { color: var(--cyan); }
+  .msg.jarvis .bubble .warn { color: #FFD166; }
+  .msg.jarvis .bubble .dim { color: var(--mut); font-size: 11.5px; }
+  .cursor { display: inline-block; width: 8px; height: 14px; background: var(--cyan); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .demo-input { display: flex; gap: 10px; padding: 14px 16px; border-top: 1px solid var(--slate); background: rgba(8, 11, 22, .55); }
+  .demo-input .prompt { font-family: var(--mono); color: var(--cyan); font-size: 15px; align-self: center; }
+  #demo-input { flex: 1; background: rgba(4, 7, 13, .6); border: 1px solid var(--slate); border-radius: var(--pill); padding: 11px 18px; color: var(--ice); font-family: var(--mono); font-size: 13.5px; outline: none; transition: border-color .15s, box-shadow .15s; }
+  #demo-input:focus { border-color: rgba(79, 216, 255, .6); box-shadow: 0 0 18px rgba(79, 216, 255, .12); }
+  #demo-input::placeholder { color: var(--mut); }
+  .demo-input button { border-radius: var(--pill); padding: 0 22px; }
+  .demo-chips { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 16px; }
+  .demo-chip { font-family: var(--mono); font-size: 12px; color: var(--mut); background: var(--surface); border: 1px solid var(--slate); border-radius: var(--pill); padding: 8px 16px; cursor: pointer; transition: color .15s, border-color .15s; }
+  .demo-chip:hover { color: var(--cyan); border-color: rgba(79, 216, 255, .6); }
+  .demo-foot { text-align: center; font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; color: var(--mut); margin-top: 14px; }
+
   /* ---- final cta + footer ---- */
   .final { text-align: center; border-top: 1px solid var(--slate); }
   .final .fine { font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; color: var(--mut); margin-top: 18px; }
@@ -306,6 +340,7 @@
         <a href="#compare">Compare</a>
         <a href="#setup">Setup</a>
         <a href="#pricing">Pricing</a>
+        <a href="#demo">Demo</a>
         <a href="#faq">FAQ</a>
       </div>
       <div class="status">
@@ -583,6 +618,39 @@
   </div>
 </section>
 
+<!-- ============ LIVE DEMO ============ -->
+<section id="demo">
+  <div class="wrap">
+    <div class="eyebrow">Live demo</div>
+    <h2>Don't take our word. Take a command.</h2>
+    <p>Type below — this console runs real rules in your browser, in JARVIS's voice. No cloud, no sign-up, no tricks.</p>
+    <div class="demo-wrap">
+      <div class="demo-titlebar">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="t">JARVIS · interactive console</div>
+        <div class="demo-status" id="demo-status">LISTENING</div>
+      </div>
+      <div class="demo-log" id="demo-log" aria-live="polite"></div>
+      <form class="demo-input" id="demo-form">
+        <span class="prompt">❯</span>
+        <input id="demo-input" autocomplete="off" spellcheck="false" maxlength="140" placeholder='say something like "open figma and slack side by side"' />
+        <button class="btn btn-primary btn-small" type="submit">Send</button>
+      </form>
+    </div>
+    <div class="demo-chips">
+      <button class="demo-chip" data-cmd="open figma and slack side by side">"Open Figma and Slack side by side"</button>
+      <button class="demo-chip" data-cmd="what's eating my cpu?">"What's eating my CPU?"</button>
+      <button class="demo-chip" data-cmd="remember that the wifi password is in the vault">"Remember the wifi password is in the vault"</button>
+      <button class="demo-chip" data-cmd="summarize what's on my screen">"Summarize what's on my screen"</button>
+      <button class="demo-chip" data-cmd="search: does the new spec break our api?">"Search: does the new spec break our API?"</button>
+      <button class="demo-chip" data-cmd="clean up my disk">"Clean up my disk"</button>
+      <button class="demo-chip" data-cmd="kill node">"Kill node"</button>
+      <button class="demo-chip" data-cmd="help">"What can you do?"</button>
+    </div>
+    <div class="demo-foot">RUNS 100% IN YOUR BROWSER · ZERO TELEMETRY · THE REAL JARVIS ADDS MICROPHONE + SYSTEM ACCESS</div>
+  </div>
+</section>
+
 <!-- ============ FINAL CTA (DealMachine pattern) ============ -->
 <section class="final">
   <div class="wrap">
@@ -784,6 +852,143 @@
         }
       }, 120);
     }));
+
+  // ---- interactive HUD demo: a tiny rule-based JARVIS ------------------------
+  const D = {
+    log: document.getElementById('demo-log'),
+    form: document.getElementById('demo-form'),
+    input: document.getElementById('demo-input'),
+    status: document.getElementById('demo-status'),
+  };
+  const demoState = { memory: [], layout: false, pendingKill: null };
+
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const now = () => new Date().toTimeString().slice(0, 5);
+  const think = () => '<span class="cursor"></span>';
+
+  function bubble(kind, who, html) {
+    const el = document.createElement('div');
+    el.className = 'msg ' + kind;
+    el.innerHTML = '<div class="who">' + who + '</div><div class="bubble">' + html + '</div>';
+    D.log.appendChild(el);
+    D.log.scrollTop = D.log.scrollHeight;
+    while (D.log.children.length > 40) D.log.removeChild(D.log.firstChild);
+    return el;
+  }
+  function userSaid(text) { bubble('user', 'YOU · ' + now(), esc(text)); }
+
+  function say(html, delay) {
+    D.status.textContent = 'PROCESSING';
+    const el = bubble('jarvis', 'JARVIS · ' + now(), think());
+    setTimeout(() => {
+      const bubbleEl = el.querySelector('.bubble');
+      const nodes = [...bubbleEl.childNodes];
+      bubbleEl.innerHTML = '';
+      let nodeIdx = 0;
+      function typeNode() {
+        if (nodeIdx >= nodes.length) { D.status.textContent = 'LISTENING'; return; }
+        const node = nodes[nodeIdx];
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent;
+          let i = 0;
+          const t = document.createTextNode('');
+          bubbleEl.appendChild(t);
+          const iv = setInterval(() => {
+            t.textContent = text.slice(0, ++i);
+            D.log.scrollTop = D.log.scrollHeight;
+            if (i >= text.length) { clearInterval(iv); nodeIdx++; typeNode(); }
+          }, 9);
+        } else {
+          bubbleEl.appendChild(node);
+          nodeIdx++;
+          typeNode();
+        }
+      }
+      typeNode();
+    }, delay || 340 + Math.random() * 380);
+  }
+
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const partOfDay = () => { const h = new Date().getHours(); return h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening'; };
+
+  const RULES = [
+    { re: /^\s*(hi|hello|hey|yo)\b/i,
+      fn: () => say('Good ' + partOfDay() + '. All systems nominal. What are we doing first?') },
+    { re: /\bhelp\b|what can you do/i,
+      fn: () => say('Try me with:<br>' +
+        '<span class="cyan">windows</span> — “open figma and slack side by side”<br>' +
+        '<span class="cyan">health</span> — “what’s eating my cpu?” or “clean up my disk”<br>' +
+        '<span class="cyan">memory</span> — “remember the wifi password is in the vault”<br>' +
+        '<span class="cyan">screen</span> — “summarize what’s on my screen”<br>' +
+        '<span class="cyan">search</span> — “search: does the spec break our api?”<br>' +
+        '<span class="cyan">danger</span> — “kill node” (watch the confirmation)') },
+    { re: /\b(remember|note)\b\s*(that\s+)?(.*)/i,
+      fn: (m) => {
+        const fact = (m[3] || '').trim();
+        if (!fact) { say('Remember <em>what</em>, exactly? Give me the whole sentence.'); return; }
+        demoState.memory.push(fact);
+        say('Stored locally: <span class="cyan">“' + esc(fact) + '”</span>.<br><span class="dim">memory/' + demoState.memory.length + ' · 0 bytes left this browser</span>');
+      } },
+    { re: /what do you remember|your memory|recall/i,
+      fn: () => say(demoState.memory.length
+        ? 'In local memory this session:<br>' + demoState.memory.map((f, i) => '<span class="cyan">' + (i + 1) + '.</span> ' + esc(f)).join('<br>')
+        : 'Memory is empty. Start with <span class="cyan">“remember …”</span> and I will keep it.') },
+    { re: /(open|launch|start)\b.*(side by side|split|next to|together)|(layout|arrange|tile)/i,
+      fn: () => {
+        demoState.layout = !demoState.layout;
+        say('Done — <span class="cyan">two windows tiled</span>, mail docked left, terminal kept visible.<br><span class="dim">layout #' + (demoState.layout ? 7 : 3) + ' · the real JARVIS drives native window APIs</span>');
+      } },
+    { re: /\b(cpu|runaway|process)\b/i,
+      fn: () => say('Top consumer right now: <span class="warn">node — ' + (220 + Math.floor(Math.random() * 160)) + '% CPU</span>.<br><span class="dim">(this page is pretending — your real CPU is fine)</span><br>Say <span class="cyan">“kill node”</span> to see the two-step confirmation.') },
+    { re: /\bkill\s+(\S+)/i,
+      fn: (m) => {
+        const proc = m[1];
+        if (demoState.pendingKill === proc) {
+          demoState.pendingKill = null;
+          say('<span class="warn">' + esc(proc) + ' terminated.</span> That’s the whole trick: irreversible actions always ask twice.<br><span class="dim">real JARVIS: per-app allowlists · spoken confirmation · audit log</span>');
+        } else {
+          demoState.pendingKill = proc;
+          say('<span class="warn">' + esc(proc) + ' is consuming heavy CPU.</span> Terminate it? This cannot be undone.<br><span class="dim">type “kill ' + esc(proc) + '” again to confirm</span>');
+        }
+      } },
+    { re: /(clean|free|clear).*(disk|space|storage|cache)|\bdisk\b/i,
+      fn: () => say('Scanned 3 volumes · found <span class="cyan">3.2 GB</span> of caches, 4 stale disk images, 1 abandoned render temp.<br><span class="warn">Cleaned 3.2 GB</span> — risky items need your say-so, so I left them.') },
+    { re: /(summarize|describe|read|what.s on|whats on).*(screen|looking at)|\bscreen\b/i,
+      fn: () => say('Reading the screen locally — <span class="cyan">4 windows</span>: a terminal mid-deploy, a design file, mail with 3 unread, and this very console.<br><span class="dim">0 bytes left the device</span>') },
+    { re: /\bsearch\b\s*[:\-]?\s*(.*)/i,
+      fn: (m) => {
+        const q = (m[1] || '').trim();
+        say('Live search' + (q ? ' for <span class="cyan">“' + esc(q) + '”</span>' : '') + ': 9 sources scanned, 4 relevant.<br><span class="dim">[1] spec repo · [2] changelog · [3] CI thread · …</span><br><span class="warn">The real JARVIS cites sources you can click.</span>');
+      } },
+    { re: /(focus|do not disturb|silence)/i,
+      fn: () => say('Focus mode: <span class="cyan">notifications held 90 min</span>, Slack paused, calendar respected. Anything marked urgent still gets through.') },
+    { re: /(thank|nice|cool|impressive|love it|great)/i,
+      fn: () => say('Noted. Efficiency is its own reward. Next?') },
+    { re: /(who are you|what are you)/i,
+      fn: () => say('A demo of <span class="cyan">J.A.R.V.I.S</span> — the voice layer for your computer — running entirely in this tab. The real one adds a microphone, system permissions and local-first memory.') },
+  ];
+
+  function respond(text) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    userSaid(trimmed);
+    for (const r of RULES) {
+      const m = trimmed.match(r.re);
+      if (m) { r.fn(m); return; }
+    }
+    say('Beyond this sandbox — but the pattern holds: I would parse it, pick the apps, do it.<br><span class="dim">type “help” for what this console understands</span>');
+  }
+
+  D.form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = D.input.value;
+    D.input.value = '';
+    respond(v);
+  });
+  document.querySelectorAll('.demo-chip').forEach((chip) =>
+    chip.addEventListener('click', () => respond(chip.dataset.cmd)));
+
+  say('JARVIS demo console online. Type a command, or tap a suggestion. Try <span class="cyan">“open figma and slack side by side”</span>.', 500);
 </script>
 </body>
 </html>
