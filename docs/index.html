@@ -326,6 +326,17 @@
   footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; color: var(--mut); }
   footer a { color: var(--mut); }
   footer a:hover { color: var(--cyan); text-decoration: none; }
+  /* ---- fleet ---- */
+  .fleet { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-top: 36px; }
+  .app-card { display: flex; flex-direction: column; gap: 6px; text-align: left; text-decoration: none; background: var(--surface); border: 1px solid var(--slate); border-radius: 16px; padding: 18px 20px; transition: border-color .15s, transform .15s, box-shadow .15s; }
+  .app-card:hover { border-color: rgba(79, 216, 255, .7); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(79, 216, 255, .10); }
+  .app-card .mount { font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; color: var(--mut); }
+  .app-card .mount b { color: var(--cyan); font-weight: 600; }
+  .app-card .name { font-size: 15.5px; font-weight: 600; color: var(--ice); }
+  .app-card .desc { font-size: 12.5px; color: var(--mut); line-height: 1.45; }
+  .app-card .go { font-family: var(--mono); font-size: 11px; color: var(--cyan); margin-top: 4px; }
+  .fleet-foot { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--mut); margin-top: 18px; }
+  .fleet-foot a { color: var(--cyan); }
   .divider { border: 0; border-top: 1px solid var(--slate); margin: 0; }
 </style>
 </head>
@@ -587,6 +598,72 @@
   </div>
 </section>
 
+<!-- ============ FLEET ============ -->
+<hr class="divider" />
+<section id="fleet">
+  <div class="wrap">
+    <div class="eyebrow">The Fleet</div>
+    <h2>Nine live apps. One portfolio. Zero npm installs.</h2>
+    <div class="fleet" id="fleet-grid">
+      <a class="app-card" href="/jarvis/" data-hub="/jarvis/" data-pages="https://casperinc6-source.github.io/jarvis-landing/">
+        <span class="mount">/jarvis · :3006</span>
+        <span class="name">J.A.R.V.I.S</span>
+        <span class="desc">Voice operating layer — this landing page, HUD + demo console.</span>
+        <span class="go">OPEN ↗</span>
+      </a>
+      <a class="app-card" href="/claims/" data-hub="/claims/" data-pages="https://casperinc6-source.github.io/claim-finder/">
+        <span class="mount">/claims · :3007</span>
+        <span class="name">ClaimFinder</span>
+        <span class="desc">Official unclaimed-money directory, all 50 states + DC, plus surplus-auction sources and a claim tracker.</span>
+        <span class="go">OPEN ↗</span>
+      </a>
+      <a class="app-card" href="/casper/" data-hub="/casper/" data-pages="https://github.com/casperinc6-source/casperinc6-source">
+        <span class="mount">/casper · :3001</span>
+        <span class="name">Casper Inc. Travel</span>
+        <span class="desc">Trip booking with transactional seat claims and real Stripe Checkout.</span>
+        <span class="go">OPEN ↗</span>
+      </a>
+      <a class="app-card" href="/growth/" data-hub="/growth/" data-pages="https://github.com/casperinc6-source/zero-growth-app">
+        <span class="mount">/growth · :3002</span>
+        <span class="name">Zero → Growth</span>
+        <span class="desc">Income/expense tracker that draws your cumulative curve from $0.</span>
+        <span class="go">OPEN ↗</span>
+      </a>
+      <a class="app-card" href="/bots/" data-hub="/bots/" data-pages="https://github.com/casperinc6-source/conway-automoton-survivalbots">
+        <span class="mount">/bots · :3004</span>
+        <span class="name">Survival Bots</span>
+        <span class="desc">Predator-prey ecology with evolvable genes: speed, sense, appetite.</span>
+        <span class="go">OPEN ↗</span>
+      </a>
+      <a class="app-card" href="/conway/" data-hub="/conway/" data-pages="https://github.com/casperinc6-source/automaton-conway">
+        <span class="mount">/conway · :3003</span>
+        <span class="name">Conway Life</span>
+        <span class="desc">Game of Life with presets, painting, and age tinting.</span>
+        <span class="go">OPEN ↗</span>
+      </a>
+      <a class="app-card" href="/clips/" data-hub="/clips/" data-pages="https://github.com/casperinc6-source/paperclip-maximizer">
+        <span class="mount">/clips · :3005</span>
+        <span class="name">Paperclip Maximizer</span>
+        <span class="desc">The idle game about turning everything into clips. Persists in SQLite.</span>
+        <span class="go">OPEN ↗</span>
+      </a>
+      <a class="app-card" href="/cobra/" data-hub="/cobra/" data-pages="https://github.com/casperinc6-source/beige-cobras-scream">
+        <span class="mount">/cobra · :3000</span>
+        <span class="name">Beige Cobras Scream</span>
+        <span class="desc">The scaffold that started it all — minimal zero-dep app shell.</span>
+        <span class="go">OPEN ↗</span>
+      </a>
+      <a class="app-card" href="/" data-hub="/" data-pages="https://github.com/casperinc6-source/fuse-hub">
+        <span class="mount">hub · :4000</span>
+        <span class="name">fuse-hub</span>
+        <span class="desc">One command launches and proxies all nine apps, with auto-restart.</span>
+        <span class="go">OPEN ↗</span>
+      </a>
+    </div>
+    <div class="fleet-foot" id="fleet-foot">RUNNING UNDER FUSE-HUB · <a href="/">HUB INDEX</a></div>
+  </div>
+</section>
+
 <!-- ============ FAQ ============ -->
 <hr class="divider" />
 <section id="faq">
@@ -667,7 +744,7 @@
 <footer>
   <div class="wrap">
     <span>J.A.R.V.I.S — VOICE OPERATING LAYER</span>
-    <span>BUILD <a href="#">0.9.4</a> · LOCAL-FIRST · <a href="#">PRIVACY</a> · <a href="#">DOCS</a></span>
+    <span>BUILD <a href="#">0.9.4</a> · <a href="#fleet">FLEET</a> · <a href="https://github.com/casperinc6-source" target="_blank" rel="noopener">GITHUB</a> · <a href="#">PRIVACY</a></span>
   </div>
 </footer>
 
@@ -708,6 +785,19 @@
 </div>
 
 <script>
+  // ---- fleet links: resolve to the right base for where this page is served
+  // (under fuse-hub → sibling mounts; on GitHub Pages → live Pages sites / repos)
+  const ROOT_BASE = location.pathname.startsWith('/jarvis/') ? '/jarvis' : '';
+  document.querySelectorAll('.app-card').forEach((a) => {
+    if (a.dataset.hub) a.href = ROOT_BASE + a.dataset.hub;
+  });
+  const fleetFoot = document.getElementById('fleet-foot');
+  if (fleetFoot) {
+    fleetFoot.innerHTML = ROOT_BASE
+      ? 'RUNNING UNDER FUSE-HUB · <a href="/">HUB INDEX</a>'
+      : 'STATIC BUILD · <a href="https://github.com/casperinc6-source" target="_blank" rel="noopener">ALL 9 REPOS ON GITHUB</a>';
+  }
+
   // ---- animated telemetry -------------------------------------------------
   const set = (id, pct) => {
     document.getElementById('f-' + id).style.width = pct + '%';
